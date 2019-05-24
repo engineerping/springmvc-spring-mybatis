@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+
+         version="2.5">
+
+  <display-name>SpringMVC-Spring-Mybatis Web Application</display-name>
+
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+  </welcome-file-list>
+  
+  <!-- 1.ContextLoaderListener 加载IOC容器，Spring的底层是Listener-->
+  <context-param>
+    <param-name>contextConfigLocation</param-name>
+    <!--  指定spring 的配置文件的路径和名称  -->
+    <param-value>classpath:spring-beans.xml</param-value>
+  </context-param>
+
+  <!-- Bootstraps the root web application context before servlet initialization -->
+  <listener>
+    <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  <!-- 防止Spring内存溢出监听器 -->
+  <listener>
+    <listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+  </listener>
+
+  <!-- 2.springMVC，springMVC底层是servlet -->
+  <servlet>
+    <servlet-name>springDispatcherServlet</servlet-name>
+    <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+    <init-param>
+      <param-name>contextConfigLocation</param-name>
+      <!-- springMVC 的配置文件 -->
+      <param-value>classpath:springMVC.xml</param-value>
+    </init-param>
+    <!-- 指示此servlet应该在Web应用程序启动时加载（实例化并调用其init（））。 -->
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <!-- Map all requests to the DispatcherServlet for handling -->
+  <servlet-mapping>
+    <servlet-name>springDispatcherServlet</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+
+
+  <!-- 3.用Filter设置编码，处理post请求乱码 -->
+  <filter>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+    <init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>CharacterEncodingFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+  <!-- 4.把post请求转换成put和delete -->
+  <!--  <filter>-->
+  <!--    <filter-name>HiddenHttpMethodFilter</filter-name>-->
+  <!--    <filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>-->
+  <!--  </filter>-->
+
+  <!--  <filter-mapping>-->
+  <!--    <filter-name>HiddenHttpMethodFilter</filter-name>-->
+  <!--    <url-pattern>/*</url-pattern>-->
+  <!--  </filter-mapping>-->
+
+  <!-- 5.要通过Put请求通过bean传递参数，则需要配置此filter -->
+  <!--  <filter>-->
+  <!--    <filter-name>httpPutFormContentFilter</filter-name>-->
+  <!--    <filter-class>org.springframework.web.filter.HttpPutFormContentFilter</filter-class>-->
+  <!--  </filter>-->
+  <!--  <filter-mapping>-->
+  <!--    <filter-name>httpPutFormContentFilter</filter-name>-->
+  <!--    <servlet-name>springDispatcherServlet</servlet-name>-->
+  <!--  </filter-mapping>-->
+
+</web-app>

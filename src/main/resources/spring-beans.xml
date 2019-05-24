@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+  <!-- 1.配置spring的 IOC 容器要管理的been,指定IOC容器要扫描的包 -->
+  <context:component-scan base-package="cn.gcsp">
+    <!-- 扫描除了注解为@Controller的类 -->
+    <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    <!-- 扫描除了注解为@ControllerAdvice的类 -->
+    <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+  </context:component-scan>
+
+  <!-- 2.加载properties文件 -->
+  <context:property-placeholder location="classpath:jdbc.properties"></context:property-placeholder>
+  
+  <!-- 3.让spring管理数据库访问相关的been -->
+  <!-- 3.1)配置数据源 -->
+  <bean id="comboPooledDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+    <property name="user" value="${jdbc.user}"></property>
+    <property name="password" value="${jdbc.password}"></property>
+    <property name="jdbcUrl" value="${jdbc.url}"></property>
+    <property name="driverClass" value="${jdbc.driverClass}"></property>
+    <property name="acquireRetryAttempts" value="${c3p0.acquireRetryAttempts}"></property>
+  </bean>
+
+<!-- 使用spring jdbcTemplate 连接数据库 start -->
+  <!-- 3.2)配置jdbcTemplate所对应的been,并注入DataSource数据源属性 -->
+<!--  <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">-->
+<!--    <property name="dataSource" ref="comboPooledDataSource"></property>-->
+<!--  </bean>-->
+
+  <!-- 3.3）为了执行带有具名参数的SQL，需要配置NamedParameterJdbcTemplate 的 been -->
+  <!-- 该NamedParameterJdbcTemplate类没有无参构造器，需要用“构造方法注入”的方式注入JdbcTemplate对象或者DataSource对象来构造 -->
+<!--  <bean class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">-->
+    <!-- 构造方法注入不能像属性注入那样用property,应该用 -->
+<!--    <constructor-arg ref="jdbcTemplate"></constructor-arg>-->
+<!--  </bean>-->
+<!-- 使用spring jdbcTemplate 连接数据库 end -->
+
+<!-- 3.2）使用Mybatis连接数据库.让spring IOC 容器管理SqlSessionFactoryBean -->
+  <bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="comboPooledDataSource"></property>
+    <!-- 指定mybatis的总配置文件，订制的environment在spring容器中不再生效-->
+    <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+  </bean>
+  <!-- 3.3)MyBatis 的  SqlSessionTemplate-->
+<!--  <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">-->
+<!--    <constructor-arg index="0" ref="sqlSessionFactoryBean" />-->
+<!--  </bean>-->
+  <!-- 3.3  -->
+  <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="sqlSessionFactoryBeanName" value="sqlSessionFactoryBean"></property>
+    <property name="basePackage" value="cn.gcsp.IDAO"></property>
+  </bean>
+
+</beans>
